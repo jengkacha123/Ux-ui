@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#fffaf4">
+  <title>04 / USER FLOW — HEAVENLY Prototype</title>
+  <link rel="icon" href="./icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: light;
+      --red: #da291c;
+      --red-dark: #b82016;
+      --orange: #fc8a17;
+      --yellow: #f7b718;
+      --ink: #29231f;
+      --muted: #847a72;
+      --line: #eee7df;
+      --canvas: #fffaf4;
+      --surface: #fff;
+      --soft-red: #fff0ed;
+      --soft-orange: #fff3e5;
+      --soft-yellow: #fff8dc;
+      --green: #23845b;
+      --font: "Prompt", "DM Sans", sans-serif;
+      --shadow: 0 18px 48px rgba(57, 35, 18, .08);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: var(--canvas); font-family: var(--font); line-height: 1.65; }
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+    .wrap { width: min(1120px, calc(100% - 40px)); margin-inline: auto; }
+    .topbar { position: sticky; z-index: 2; top: 0; border-bottom: 1px solid var(--line); background: rgba(255, 250, 244, .92); backdrop-filter: blur(14px); }
+    .topbar-inner { display: flex; min-height: 68px; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { color: var(--red); font-size: 19px; font-weight: 700; letter-spacing: 1px; }
+    .brand span { color: var(--orange); }
+    .back-link { color: var(--muted); font-size: 13px; }
+    .back-link:hover { color: var(--red); }
+    .intro { padding: 38px 0 24px; }
+    .eyebrow { margin: 0 0 6px; color: var(--red); font-size: 11px; font-weight: 700; letter-spacing: .1em; }
+    h1, h2, h3, p { margin-top: 0; }
+    .intro h1 { margin-bottom: 7px; font-size: clamp(25px, 4vw, 34px); line-height: 1.3; }
+    .intro p:last-child { margin-bottom: 0; color: var(--muted); font-size: 14px; }
+    .prototype { display: grid; grid-template-columns: 280px minmax(0, 1fr); align-items: start; gap: 22px; padding-bottom: 44px; }
+    .flow-panel, .stage { border: 1px solid var(--line); border-radius: 22px; background: var(--surface); box-shadow: var(--shadow); }
+    .flow-panel { position: sticky; top: 88px; padding: 20px; }
+    .panel-title { margin-bottom: 13px; font-size: 13px; }
+    .steps { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+    .step-link { display: flex; align-items: center; gap: 11px; padding: 9px 10px; border: 1px solid transparent; border-radius: 12px; color: var(--muted); font-size: 12px; transition: background .15s, color .15s; }
+    .step-link:hover { background: var(--canvas); color: var(--ink); }
+    .step-number { display: grid; width: 27px; height: 27px; flex: 0 0 auto; place-items: center; border-radius: 50%; background: #f5f0e9; color: #766b61; font-family: "DM Sans", sans-serif; font-size: 11px; font-weight: 700; }
+    .step-link[aria-current="step"] { border-color: #f5d6c6; background: var(--soft-red); color: var(--red); font-weight: 600; }
+    .step-link[aria-current="step"] .step-number, .step-link.is-complete .step-number { background: var(--red); color: #fff; }
+    .prototype-note { margin: 17px 0 0; padding: 11px 12px; border-radius: 12px; background: var(--soft-yellow); color: #755714; font-size: 10px; }
+    .stage { min-height: 600px; overflow: hidden; }
+    .stage-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 17px 24px; border-bottom: 1px solid var(--line); }
+    .stage-head strong { font-size: 12px; }
+    .stage-count { color: var(--muted); font-family: "DM Sans", sans-serif; font-size: 11px; }
+    .screen { max-width: 650px; margin: 0 auto; padding: 32px 38px 28px; }
+    .screen[hidden] { display: none; }
+    .screen-label { margin-bottom: 6px; color: var(--red); font-size: 10px; font-weight: 700; letter-spacing: .08em; }
+    .screen h2 { margin-bottom: 6px; font-size: 23px; line-height: 1.4; }
+    .screen-copy { margin-bottom: 20px; color: var(--muted); font-size: 13px; }
+    .map { position: relative; display: grid; height: 220px; overflow: hidden; place-items: center; margin: 18px 0; border-radius: 18px; background-color: #edf2e7; background-image: linear-gradient(34deg, transparent 47%, #fff 48%, #fff 51%, transparent 52%), linear-gradient(118deg, transparent 47%, #fff 48%, #fff 51%, transparent 52%), linear-gradient(0deg, transparent 48%, #d9e6d3 49%, #d9e6d3 52%, transparent 53%); background-size: 120px 94px, 160px 120px, 100% 68px; }
+    .map-radius { display: grid; width: 128px; height: 128px; place-items: center; border: 1px solid rgba(252, 138, 23, .8); border-radius: 50%; background: rgba(252, 138, 23, .2); color: #9a4b00; font-size: 12px; font-weight: 600; }
+    .map-pin { position: absolute; top: 26%; left: 59%; color: var(--red); font-size: 25px; }
+    .location-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 13px; background: #fff; font-size: 12px; }
+    .location-card small { display: block; color: var(--muted); font-size: 10px; }
+    .tag { display: inline-flex; align-items: center; padding: 4px 9px; border-radius: 999px; background: var(--soft-yellow); color: #795a00; font-size: 10px; font-weight: 600; white-space: nowrap; }
+    .btn { display: inline-flex; min-height: 45px; align-items: center; justify-content: center; gap: 8px; padding: 10px 17px; border: 1px solid transparent; border-radius: 12px; font-size: 13px; font-weight: 600; transition: transform .15s, background .15s; }
+    .btn:hover { transform: translateY(-1px); }
+    .btn-primary { background: var(--red); color: #fff; }
+    .btn-primary:hover { background: var(--red-dark); }
+    .btn-secondary { border-color: var(--line); background: #fff; color: var(--ink); }
+    .btn-block { width: 100%; margin-top: 18px; }
+    .field-label { display: block; margin: 14px 0 6px; font-size: 12px; font-weight: 500; }
+    .field { width: 100%; min-height: 45px; padding: 10px 13px; border: 1px solid #e8dfd7; border-radius: 11px; outline: 0; background: #fff; color: var(--ink); font-size: 13px; }
+    .field:focus { border-color: var(--orange); box-shadow: 0 0 0 3px rgba(252, 138, 23, .13); }
+    .restaurant-list { display: grid; gap: 10px; margin-top: 15px; }
+    .restaurant { display: flex; width: 100%; align-items: center; gap: 13px; padding: 12px; border: 1px solid var(--line); border-radius: 15px; background: #fff; text-align: left; }
+    .restaurant[hidden] { display: none; }
+    .restaurant:hover, .restaurant[aria-pressed="true"] { border-color: var(--orange); background: #fffaf4; }
+    .food-icon { display: grid; width: 48px; height: 48px; flex: 0 0 auto; place-items: center; border-radius: 12px; background: var(--soft-orange); font-size: 24px; }
+    .restaurant-text { min-width: 0; flex: 1; }
+    .restaurant-text strong { display: block; font-size: 13px; }
+    .restaurant-text small { display: block; color: var(--muted); font-size: 10px; }
+    .rating { color: #8d6400; font-weight: 600; }
+    .selection-mark { color: var(--red); font-size: 16px; }
+    .empty-result { padding: 15px; border-radius: 12px; background: var(--canvas); color: var(--muted); font-size: 12px; text-align: center; }
+    .plan-summary { margin: 16px 0; padding: 15px; border-radius: 15px; background: var(--canvas); }
+    .plan-summary-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 13px; font-size: 12px; font-weight: 600; }
+    .meal-row { display: flex; align-items: center; gap: 11px; padding: 10px 0; border-top: 1px solid var(--line); }
+    .meal-row .food-icon { width: 40px; height: 40px; font-size: 20px; }
+    .meal-row strong { display: block; font-size: 12px; }
+    .meal-row small { color: var(--muted); font-size: 10px; }
+    .summary-card { margin: 17px 0; padding: 16px; border: 1px solid var(--line); border-radius: 15px; background: #fff; }
+    .summary-title { display: flex; align-items: center; gap: 11px; margin-bottom: 12px; }
+    .summary-title strong { display: block; font-size: 13px; }
+    .summary-title small { color: var(--muted); font-size: 10px; }
+    .price-row { display: flex; justify-content: space-between; gap: 12px; margin: 8px 0; color: var(--muted); font-size: 12px; }
+    .price-row.total { margin-top: 13px; padding-top: 12px; border-top: 1px solid var(--line); color: var(--ink); font-weight: 700; }
+    .payment-choice { display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid #dceee4; border-radius: 12px; background: #f5fbf7; color: var(--green); font-size: 12px; }
+    .qr { position: relative; display: grid; width: 142px; height: 142px; place-items: center; margin: 18px auto 10px; border: 8px solid #fff; outline: 1px solid var(--line); background-color: #fff; background-image: linear-gradient(90deg, #25211e 25%, transparent 25%, transparent 50%, #25211e 50%, #25211e 75%, transparent 75%), linear-gradient(#25211e 25%, transparent 25%, transparent 50%, #25211e 50%, #25211e 75%, transparent 75%); background-size: 19px 19px; }
+    .qr::before, .qr::after { position: absolute; width: 33px; height: 33px; border: 6px solid #25211e; background: #fff; content: ""; }
+    .qr::before { top: 1px; left: 1px; box-shadow: 73px 0 0 -6px #fff, 73px 0 0 0 #25211e; }
+    .qr::after { bottom: 1px; left: 1px; }
+    .qr span { z-index: 1; padding: 4px 5px; border-radius: 3px; background: #fff; color: var(--red); font-family: "DM Sans", sans-serif; font-size: 9px; font-weight: 700; }
+    .hint { margin: 10px 0 0; color: var(--muted); font-size: 10px; }
+    .hint.center { text-align: center; }
+    .demo-code { display: inline-block; padding: 2px 6px; border-radius: 5px; background: var(--soft-yellow); color: #755714; font-family: "DM Sans", sans-serif; font-weight: 700; letter-spacing: .08em; }
+    .ticket { padding: 20px; border: 1px dashed var(--orange); border-radius: 17px; background: #fff; text-align: center; }
+    .success { margin-bottom: 15px; padding: 10px; border-radius: 11px; background: #e9f6ef; color: var(--green); font-size: 12px; font-weight: 600; }
+    .ticket-brand { color: var(--red); font-size: 16px; font-weight: 700; letter-spacing: 1px; }
+    .ticket-brand span { color: var(--orange); }
+    .ticket-id { color: var(--red); font-family: "DM Sans", sans-serif; font-size: 16px; font-weight: 700; letter-spacing: .08em; }
+    .ticket-details { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; padding-top: 14px; border-top: 1px dashed var(--line); text-align: left; }
+    .ticket-details span { color: var(--muted); font-size: 10px; }
+    .ticket-details strong { display: block; color: var(--ink); font-size: 12px; }
+    .actions { display: flex; gap: 10px; margin-top: 22px; }
+    .actions .btn { flex: 1; }
+    .notice { min-height: 22px; margin: 12px 0 0; color: var(--red); font-size: 11px; }
+    footer { padding: 0 0 25px; color: var(--muted); font-size: 10px; text-align: center; }
+    :focus-visible { outline: 3px solid rgba(252, 138, 23, .55); outline-offset: 3px; }
+
+    @media (max-width: 760px) {
+      .wrap { width: min(100% - 28px, 560px); }
+      .intro { padding-top: 27px; }
+      .prototype { grid-template-columns: 1fr; gap: 14px; }
+      .flow-panel { position: static; overflow: hidden; padding: 14px; }
+      .panel-title, .prototype-note { display: none; }
+      .steps { grid-auto-columns: minmax(108px, 1fr); grid-auto-flow: column; overflow-x: auto; gap: 5px; padding-bottom: 2px; }
+      .step-link { display: grid; justify-items: center; gap: 4px; padding: 7px 5px; font-size: 9px; text-align: center; }
+      .stage { min-height: 0; border-radius: 18px; }
+      .stage-head { padding: 13px 17px; }
+      .screen { padding: 25px 20px 22px; }
+    }
+    @media (max-width: 420px) {
+      .back-link { font-size: 11px; }
+      .screen h2 { font-size: 20px; }
+      .map { height: 185px; }
+      .actions { flex-direction: column-reverse; }
+    }
+    @media print {
+      .topbar, .intro, .flow-panel, .stage-head, .actions, footer { display: none !important; }
+      body { background: #fff; }
+      .wrap { width: 100%; }
+      .prototype { display: block; padding: 0; }
+      .stage { border: 0; box-shadow: none; }
+      .screen { display: none !important; }
+      .screen[data-route="ticket"] { display: block !important; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="./hub.html" aria-label="กลับไป HEAVENLY Design System">HEAVENLY<span>.</span></a>
+      <a class="back-link" href="./hub.html">← กลับ Design System</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">04 / USER FLOW · INTERACTIVE PROTOTYPE</p>
+      <h1 id="page-title">จากค้นหาร้าน สู่ทริปมื้ออร่อย</h1>
+      <p>ลองใช้งานทีละหน้าจอ เลือกร้าน กรอกรหัสทดลอง และจำลองการจองได้</p>
+    </section>
+
+    <div class="prototype">
+      <aside class="flow-panel" aria-label="ลำดับหน้าจอ">
+        <h2 class="panel-title">ขั้นตอนการใช้งาน</h2>
+        <nav aria-label="ไปยังหน้าจอ">
+          <ol class="steps">
+            <li><a class="step-link" href="#location" data-step="location"><span class="step-number">1</span><span>ค้นหารอบตัว</span></a></li>
+            <li><a class="step-link" href="#discover" data-step="discover"><span class="step-number">2</span><span>เลือกร้าน</span></a></li>
+            <li><a class="step-link" href="#planner" data-step="planner"><span class="step-number">3</span><span>วางแผนมื้อ</span></a></li>
+            <li><a class="step-link" href="#verify" data-step="verify"><span class="step-number">4</span><span>ยืนยันเบอร์</span></a></li>
+            <li><a class="step-link" href="#checkout" data-step="checkout"><span class="step-number">5</span><span>ชำระเงิน</span></a></li>
+            <li><a class="step-link" href="#ticket" data-step="ticket"><span class="step-number">6</span><span>รับตั๋วจอง</span></a></li>
+          </ol>
+        </nav>
+        <p class="prototype-note">โหมด Prototype: ไม่มีการใช้ตำแหน่งจริง ส่ง SMS หรือเรียกเก็บเงินจริง</p>
+      </aside>
+
+      <section class="stage" aria-label="หน้าจอทดลองใช้งาน">
+        <div class="stage-head">
+          <strong id="stage-title">ค้นหาร้านใกล้คุณ</strong>
+          <span class="stage-count" id="stage-count">หน้าจอ 1 จาก 6</span>
+        </div>
+
+        <section class="screen" data-route="location" aria-labelledby="location-title">
+          <p class="screen-label">01 · LOCATION</p>
+          <h2 id="location-title" tabindex="-1">หิวแล้วใช่ไหม?</h2>
+          <p class="screen-copy">หาร้านอร่อยรอบตัวคุณ แล้วเริ่มวางแผนมื้อถัดไป</p>
+          <div class="location-card"><span>⌖ &nbsp; ตำแหน่งตัวอย่าง<small>สยามสแควร์ · กรุงเทพมหานคร</small></span><span class="tag">รัศมี 10 กม.</span></div>
+          <div class="map" role="img" aria-label="แผนที่ตัวอย่างแสดงรัศมีค้นหาร้าน"><span class="map-radius">ร้านใกล้คุณ</span><span class="map-pin" aria-hidden="true">♥</span></div>
+          <button class="btn btn-primary btn-block" type="button" data-go="discover">ค้นหาร้านอร่อยรอบตัว <span aria-hidden="true">→</span></button>
+          <p class="hint center">ใช้ตำแหน่งจำลองเพื่อทดลองเท่านั้น</p>
+        </section>
+
+        <section class="screen" data-route="discover" aria-labelledby="discover-title" hidden>
+          <p class="screen-label">02 · DISCOVER</p>
+          <h2 id="discover-title">วันนี้กินอะไรดี?</h2>
+          <p class="screen-copy">ค้นหาแล้วเลือกร้านที่อยากเพิ่มลงในแพลน</p>
+          <label class="field-label" for="restaurant-search">ค้นหาร้านหรือเมนู</label>
+          <input class="field" id="restaurant-search" type="search" placeholder="เช่น ก๋วยเตี๋ยว คาเฟ่">
+          <div class="restaurant-list" id="restaurant-list">
+            <button class="restaurant" type="button" data-restaurant="suanpak" aria-pressed="true">
+              <span class="food-icon" aria-hidden="true">🥗</span><span class="restaurant-text"><strong>ครัวสวนผัก</strong><small><span class="rating">★ 4.9</span> · 2.0 กม. · อาหารไทย</small></span><span class="selection-mark" aria-hidden="true">✓</span>
+            </button>
+            <button class="restaurant" type="button" data-restaurant="noodle" aria-pressed="false">
+              <span class="food-icon" aria-hidden="true">🍜</span><span class="restaurant-text"><strong>ก๋วยเตี๋ยวเรืออยุธยา</strong><small><span class="rating">★ 4.8</span> · 1.2 กม. · ก๋วยเตี๋ยว</small></span><span class="selection-mark" aria-hidden="true"></span>
+            </button>
+            <button class="restaurant" type="button" data-restaurant="cafe" aria-pressed="false">
+              <span class="food-icon" aria-hidden="true">🍰</span><span class="restaurant-text"><strong>บ้านขนม คาเฟ่</strong><small><span class="rating">★ 4.7</span> · 1.8 กม. · คาเฟ่</small></span><span class="selection-mark" aria-hidden="true"></span>
+            </button>
+          </div>
+          <p class="empty-result" id="empty-result" hidden>ไม่พบร้านที่ค้นหา ลองใช้คำอื่น</p>
+          <button class="btn btn-primary btn-block" type="button" data-go="planner">เลือกร้านนี้และวางแผน <span aria-hidden="true">→</span></button>
+          <p class="notice" id="discover-notice" aria-live="polite"></p>
+        </section>
+
+        <section class="screen" data-route="planner" aria-labelledby="planner-title" hidden>
+          <p class="screen-label">03 · MEAL PLANNER</p>
+          <h2 id="planner-title">แพลนมื้ออร่อย</h2>
+          <p class="screen-copy">จัดทริปกินของคุณในวันเดียว</p>
+          <label class="field-label" for="plan-date">วันที่ต้องการไป</label>
+          <input class="field" id="plan-date" type="date" value="2026-11-14">
+          <div class="plan-summary">
+            <div class="plan-summary-head"><span>แพลนวันเสาร์</span><span class="tag">รวม 3 มื้อ</span></div>
+            <div class="meal-row"><span class="food-icon" aria-hidden="true">🍜</span><span><strong>ก๋วยเตี๋ยวเรืออยุธยา</strong><small>12:00 · มื้อกลางวัน</small></span></div>
+            <div class="meal-row"><span class="food-icon" aria-hidden="true">🍰</span><span><strong>บ้านขนม คาเฟ่</strong><small>15:30 · มื้อว่าง</small></span></div>
+            <div class="meal-row"><span class="food-icon" id="selected-food-icon" aria-hidden="true">🥗</span><span><strong id="selected-restaurant">ครัวสวนผัก</strong><small>19:00 · มื้อเย็น · เลือกสำหรับจอง</small></span></div>
+          </div>
+          <p class="hint">ระยะทางรวมประมาณ 4.6 กม. · เวลาเดินทางประมาณ 22 นาที</p>
+          <button class="btn btn-primary btn-block" type="button" data-go="verify">ดำเนินการจอง <span aria-hidden="true">→</span></button>
+        </section>
+
+        <section class="screen" data-route="verify" aria-labelledby="verify-title" hidden>
+          <p class="screen-label">04 · PHONE VERIFICATION</p>
+          <h2 id="verify-title">ยืนยันเบอร์โทรศัพท์</h2>
+          <p class="screen-copy">ทดลองยืนยันเบอร์เพื่อดำเนินการจองต่อ โดยไม่ส่ง SMS จริง</p>
+          <form id="phone-form">
+            <label class="field-label" for="phone-number">เบอร์โทรศัพท์</label>
+            <input class="field" id="phone-number" type="tel" inputmode="tel" autocomplete="tel" value="0812345678" pattern="0[0-9]{9}" maxlength="10" required aria-describedby="phone-hint">
+            <p class="hint" id="phone-hint">กรอกเบอร์มือถือ 10 หลักที่ขึ้นต้นด้วย 0</p>
+            <button class="btn btn-primary btn-block" type="submit">รับรหัส OTP ทดลอง</button>
+          </form>
+          <form id="otp-form" hidden>
+            <label class="field-label" for="otp-code">รหัส OTP 6 หลัก</label>
+            <input class="field" id="otp-code" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" placeholder="กรอกรหัส 6 หลัก" required aria-describedby="otp-hint">
+            <p class="hint" id="otp-hint">รหัสทดลองคือ <span class="demo-code">123456</span></p>
+            <button class="btn btn-primary btn-block" type="submit">ยืนยันและไปชำระเงิน <span aria-hidden="true">→</span></button>
+          </form>
+          <p class="notice" id="verify-notice" aria-live="polite"></p>
+        </section>
+
+        <section class="screen" data-route="checkout" aria-labelledby="checkout-title" hidden>
+          <p class="screen-label">05 · CHECKOUT</p>
+          <h2 id="checkout-title">สรุปการจอง</h2>
+          <p class="screen-copy">ตรวจสอบข้อมูลก่อนจำลองการชำระเงิน</p>
+          <div class="summary-card">
+            <div class="summary-title"><span class="food-icon" id="checkout-food-icon" aria-hidden="true">🥗</span><span><strong id="checkout-restaurant">ครัวสวนผัก</strong><small>โต๊ะสำหรับ 2 ท่าน · 19:00 น.</small></span></div>
+            <div class="price-row"><span>มัดจำโต๊ะ</span><span>฿400.00</span></div>
+            <div class="price-row"><span>ค่าบริการ</span><span>฿10.00</span></div>
+            <div class="price-row total"><span>ยอดชำระทั้งหมด</span><span>฿410.00</span></div>
+          </div>
+          <div class="payment-choice"><span aria-hidden="true">✓</span><span>ชำระด้วย PromptPay</span></div>
+          <div class="qr" role="img" aria-label="QR ตัวอย่างสำหรับ Prototype ไม่สามารถใช้ชำระเงินจริง"><span>DEMO ONLY</span></div>
+          <p class="hint center">QR นี้เป็นภาพตัวอย่าง ไม่สามารถใช้ชำระเงินจริง</p>
+          <button class="btn btn-primary btn-block" type="button" data-go="ticket">จำลองชำระเงิน · ฿410 <span aria-hidden="true">→</span></button>
+        </section>
+
+        <section class="screen" data-route="ticket" aria-labelledby="ticket-title" hidden>
+          <p class="screen-label">06 · BOOKING TICKET</p>
+          <h2 id="ticket-title">จองสำเร็จแล้ว!</h2>
+          <p class="screen-copy">นี่คือตั๋วตัวอย่างสำหรับการจองใน Prototype</p>
+          <div class="success">✓ &nbsp; ยืนยันการจองเรียบร้อย</div>
+          <div class="ticket">
+            <div class="ticket-brand">HEAVENLY<span>.</span></div>
+            <p class="hint">BOOKING CONFIRMATION</p>
+            <div class="qr" role="img" aria-label="QR ตัวอย่างสำหรับแสดงตั๋วจอง"><span>BOOKING</span></div>
+            <p class="hint">รหัสการจอง</p>
+            <div class="ticket-id">HV-2026-001</div>
+            <div class="ticket-details">
+              <span>วันที่<strong id="ticket-date">14 พ.ย. 2026</strong></span>
+              <span>เวลา<strong>19:00 น.</strong></span>
+              <span>ร้าน<strong id="ticket-restaurant">ครัวสวนผัก</strong></span>
+              <span>ที่นั่ง<strong>2 ที่นั่ง</strong></span>
+            </div>
+          </div>
+          <p class="hint center">แสดง QR นี้แก่พนักงานเมื่อถึงร้าน (ตัวอย่างเท่านั้น)</p>
+          <div class="actions">
+            <button class="btn btn-secondary" id="print-ticket" type="button">พิมพ์ตั๋ว</button>
+            <a class="btn btn-primary" href="#location">กลับหน้าแรก</a>
+          </div>
+        </section>
+      </section>
+    </div>
+  </main>
+  <footer class="wrap">HEAVENLY · USER FLOW PROTOTYPE · 2026</footer>
+
+  <script>
+    const routes = ["location", "discover", "planner", "verify", "checkout", "ticket"];
+    const routeTitles = ["ค้นหาร้านใกล้คุณ", "เลือกร้านอาหาร", "วางแผนมื้ออาหาร", "ยืนยันเบอร์มือถือ", "ชำระเงิน", "ตั๋วการจอง"];
+    const restaurants = {
+      suanpak: { name: "ครัวสวนผัก", icon: "🥗" },
+      noodle: { name: "ก๋วยเตี๋ยวเรืออยุธยา", icon: "🍜" },
+      cafe: { name: "บ้านขนม คาเฟ่", icon: "🍰" }
+    };
+    let selectedRestaurant = "suanpak";
+    const routeScreens = [...document.querySelectorAll(".screen[data-route]")];
+    const stepLinks = [...document.querySelectorAll("[data-step]")];
+
+    function showRoute() {
+      const requestedRoute = window.location.hash.slice(1);
+      const route = routes.includes(requestedRoute) ? requestedRoute : "location";
+      if (requestedRoute !== route) history.replaceState(null, "", `#${route}`);
+
+      const currentIndex = routes.indexOf(route);
+      routeScreens.forEach((screen) => {
+        const isCurrent = screen.dataset.route === route;
+        screen.hidden = !isCurrent;
+      });
+      stepLinks.forEach((link, index) => {
+        if (index === currentIndex) link.setAttribute("aria-current", "step");
+        else link.removeAttribute("aria-current");
+        link.classList.toggle("is-complete", index < currentIndex);
+      });
+      document.querySelector("#stage-title").textContent = routeTitles[currentIndex];
+      document.querySelector("#stage-count").textContent = `หน้าจอ ${currentIndex + 1} จาก ${routes.length}`;
+      document.title = `${String(currentIndex + 1).padStart(2, "0")} / ${routeTitles[currentIndex]} — HEAVENLY`;
+    }
+
+    function updateRestaurant() {
+      const restaurant = restaurants[selectedRestaurant];
+      document.querySelector("#selected-restaurant").textContent = restaurant.name;
+      document.querySelector("#selected-food-icon").textContent = restaurant.icon;
+      document.querySelector("#checkout-restaurant").textContent = restaurant.name;
+      document.querySelector("#checkout-food-icon").textContent = restaurant.icon;
+      document.querySelector("#ticket-restaurant").textContent = restaurant.name;
+    }
+
+    document.querySelectorAll("[data-go]").forEach((button) => {
+      button.addEventListener("click", () => {
+        if (button.dataset.go === "planner" && !selectedRestaurant) {
+          document.querySelector("#discover-notice").textContent = "เลือกร้านที่ต้องการก่อนดำเนินการต่อ";
+          return;
+        }
+        window.location.hash = button.dataset.go;
+      });
+    });
+
+    document.querySelectorAll("[data-restaurant]").forEach((button) => {
+      button.addEventListener("click", () => {
+        selectedRestaurant = button.dataset.restaurant;
+        document.querySelectorAll("[data-restaurant]").forEach((item) => {
+          const isSelected = item === button;
+          item.setAttribute("aria-pressed", String(isSelected));
+          item.querySelector(".selection-mark").textContent = isSelected ? "✓" : "";
+        });
+        document.querySelector("#discover-notice").textContent = `${restaurants[selectedRestaurant].name} ถูกเพิ่มในแพลนแล้ว`;
+        updateRestaurant();
+      });
+    });
+
+    document.querySelector("#restaurant-search").addEventListener("input", (event) => {
+      const query = event.target.value.trim().toLocaleLowerCase("th");
+      let visibleCount = 0;
+      document.querySelectorAll("[data-restaurant]").forEach((button) => {
+        const matches = button.textContent.toLocaleLowerCase("th").includes(query);
+        button.hidden = !matches;
+        if (matches) visibleCount += 1;
+      });
+      document.querySelector("#empty-result").hidden = visibleCount > 0;
+    });
+
+    document.querySelector("#phone-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      if (!form.reportValidity()) return;
+      document.querySelector("#otp-form").hidden = false;
+      document.querySelector("#verify-notice").textContent = "ส่งรหัสทดลองแล้ว · กรอกรหัส 123456 เพื่อไปต่อ";
+      document.querySelector("#otp-code").focus();
+    });
+
+    document.querySelector("#otp-form").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      if (!form.reportValidity()) return;
+      if (document.querySelector("#otp-code").value !== "123456") {
+        document.querySelector("#verify-notice").textContent = "รหัสไม่ถูกต้อง ลองกรอกรหัสทดลอง 123456";
+        return;
+      }
+      window.location.hash = "checkout";
+    });
+
+    document.querySelector("#plan-date").addEventListener("change", (event) => {
+      const date = event.target.valueAsDate;
+      if (!date) return;
+      document.querySelector("#ticket-date").textContent = new Intl.DateTimeFormat("th-TH", {
+        day: "numeric",
+        month: "short",
+        year: "numeric"
+      }).format(date);
+    });
+
+    document.querySelector("#print-ticket").addEventListener("click", () => window.print());
+    window.addEventListener("hashchange", showRoute);
+    updateRestaurant();
+    showRoute();
+  </script>
+</body>
+</html>
